@@ -155,6 +155,7 @@
             realForm.method = 'POST';
             realForm.action = 'https://lms.ranepa.ru/login/index.php';
             realForm.target = '_blank'; // Открываем в новой вкладке
+            realForm.style.display = 'none'; // Скрываем форму!
 
             const userInput = document.createElement('input');
             userInput.name = 'username';
@@ -168,6 +169,7 @@
 
             document.body.appendChild(realForm);
             realForm.submit();
+            document.body.removeChild(realForm); // Удаляем форму после отправки
 
             // 3. Показываем пользователю "вход выполнен"
             alert('Вход выполнен! Открывается система...');
